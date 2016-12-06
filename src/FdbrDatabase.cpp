@@ -38,25 +38,31 @@ namespace FileDBR {
 
     bool FdbrDatabase::create() {
 
+        return true;
     }
 
     string FdbrDatabase::retrieveRowR() {
 
+        return "hello";
     }
 
     string FdbrDatabase::retrieveResultR() {
-
+        
+        return "hello";
     }
 
     bool FdbrDatabase::updateR() {
 
+        return true;
     }
 
     bool FdbrDatabase::deleteR() {
 
+        return true;
     }
 
     int FdbrDatabase::countR() {
 
+        return 0;
     }
 }
