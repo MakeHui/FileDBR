@@ -7,6 +7,8 @@
 
 #include <fstream>
 #include <string>
+#include <vector>
+#include <map>
 
 using namespace std;
 
@@ -14,35 +16,45 @@ namespace FileDBR {
     class FdbrDatabase {
     public:
         FdbrDatabase();
-
         FdbrDatabase(string databasePath);
-
-        FdbrDatabase(string databasePath, string tableName);
 
         ~FdbrDatabase();
 
-        void setTableNameR(string tableName);
+        void setDatabasePath(string databasePath);
+        string getDatabasePath();
 
-        void setDatabasePathR(string databasePath);
-
-        bool create();
-
-        string retrieveRowR();
-
-        string retrieveResultR();
-
-        bool updateR();
-
-        bool deleteR();
-
-        int countR();
+        bool openFile(string fileName);
+        void closeFile(string fileName);
+        void deleteFile(string fileName);
+        void read(string fileName);
+        void write(string fileName);
+        void change(string fileName);
+        void del(string fileName);
 
     protected:
+        /**
+         * string split to array
+         *
+         * @param str
+         * @param pattern
+         * @param limit
+         *
+         * @return vector<string>
+         */
+        vector<string> split(const string str, string pattern, int limit = 512);
+
+        /**
+         * string to char
+         * @param str
+         * @return
+         */
+        char * strToChar(string str);
+
+    public:
+        map<string, fstream *> files;
 
     private:
         string databasePath;
-        string tableName;
-        ofstream DBR;
     };
 }
 

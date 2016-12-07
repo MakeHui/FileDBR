@@ -2,14 +2,13 @@
 // Created by MakeHui on 16/12/5.
 //
 
+#include <sstream>
+
 #include "FdbrDatabase.h"
 
-#include <iostream>
-
-using namespace std;
+//#define FDBR_SPLIT_PATTERN    ","
 
 namespace FileDBR {
-
 
     FdbrDatabase::FdbrDatabase() {
 
@@ -19,50 +18,51 @@ namespace FileDBR {
         this->databasePath = databasePath;
     }
 
-    FdbrDatabase::FdbrDatabase(string databasePath, string tableName) {
-        this->databasePath = databasePath;
-        this->tableName = tableName;
-    }
-
     FdbrDatabase::~FdbrDatabase() {
 
     }
 
-    void FdbrDatabase::setTableNameR(string tableName) {
-        this->tableName = tableName;
+    vector<string> FdbrDatabase::split(const string str, string pattern, int limit) {
+        vector<string> elems;
+        string buf = pattern; // Have a buffer string
+        stringstream ss(str); // Insert the string into a stream
+
+        vector<string> tokens; // Create vector to hold our words
+
+        int i = 0;
+        while (ss >> buf) {
+            elems.push_back(buf);
+            i++;
+            if (i == limit) break;
+        }
+        return elems;
     }
 
-    void FdbrDatabase::setDatabasePathR(string databasePath) {
+    char * FdbrDatabase::strToChar(string str) {
+        char * writable = new char[str.size() + 1];
+        std::copy(str.begin(), str.end(), writable);
+        writable[str.size()] = '\0'; // don't forget the terminating 0
+
+        return writable;
+    }
+
+    void FdbrDatabase::setDatabasePath(string databasePath) {
         this->databasePath = databasePath;
     }
 
-    bool FdbrDatabase::create() {
-
-        return true;
+    string FdbrDatabase::getDatabasePath() {
+        return this->databasePath;
     }
 
-    string FdbrDatabase::retrieveRowR() {
+    bool FdbrDatabase::openFile(string fileName) {
+        fstream *fs = new fstream(this->databasePath + fileName, ios::in|ios::out|ios::binary);
 
-        return "hello";
+        if (*fs) {
+            this->files[fileName] = fs;
+            return true;
+        }
+
+        return false;
     }
 
-    string FdbrDatabase::retrieveResultR() {
-        
-        return "hello";
-    }
-
-    bool FdbrDatabase::updateR() {
-
-        return true;
-    }
-
-    bool FdbrDatabase::deleteR() {
-
-        return true;
-    }
-
-    int FdbrDatabase::countR() {
-
-        return 0;
-    }
 }
