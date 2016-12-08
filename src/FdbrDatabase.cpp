@@ -21,6 +21,28 @@ namespace FileDBR {
     FdbrDatabase::~FdbrDatabase() {
 
     }
+    
+    bool FdbrDatabase::existFile(string fileName) {
+        fstream fs(fileName, ios::in);
+        
+        bool exist = false;
+        if (fs) exist = true;
+        
+        fs.close();
+        
+        return exist;
+    }
+    
+    bool FdbrDatabase::createFile(string fileName) {
+        fstream fs(fileName, ios::out);
+        
+        bool success = false;
+        if (fs) success = true;
+        
+        fs.close();
+        
+        return success;
+    }
 
     vector<string> FdbrDatabase::split(const string str, string pattern, int limit) {
         vector<string> elems;
@@ -55,7 +77,7 @@ namespace FileDBR {
     }
 
     bool FdbrDatabase::openFile(string fileName) {
-        fstream *fs = new fstream(this->databasePath + fileName, ios::in|ios::out|ios::binary);
+        fstream *fs = new fstream(this->databasePath + fileName, ios::in|ios::out);
 
         if (*fs) {
             this->files[fileName] = fs;
