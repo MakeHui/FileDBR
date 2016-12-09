@@ -6,47 +6,123 @@
 
 #include "FdbrDatabase.h"
 
-//#define FDBR_SPLIT_PATTERN    ","
-
 namespace FileDBR {
 
     FdbrDatabase::FdbrDatabase() {
 
     }
 
-    FdbrDatabase::FdbrDatabase(string databasePath) {
-        this->databasePath = databasePath;
+    FdbrDatabase::FdbrDatabase(string databasePath, string delimiter): databasePath(databasePath), delimiter(delimiter) {
+        
     }
 
     FdbrDatabase::~FdbrDatabase() {
-
+        this->closeFile();
+    }
+    
+    void FdbrDatabase::setDatabasePath(string databasePath) {
+        this->databasePath = databasePath;
+    }
+    
+    string FdbrDatabase::getDatabasePath() {
+        return this->databasePath;
+    }
+    
+    void FdbrDatabase::setDelimiter(string str) {
+        this->delimiter = str;
+    }
+    
+    string FdbrDatabase::getDelimiter() {
+        return this->delimiter;
+    }
+    
+    bool FdbrDatabase::openFile(string fileName) {
+        if (this->fs) this->closeFile();
+        
+        this->fs.open(this->databasePath + fileName);
+        
+        bool result = false;
+        if (this->fs) result = true;
+        
+        return result;
+    }
+    
+    void FdbrDatabase::closeFile() {
+        this->fs.close();
+    }
+    
+    bool FdbrDatabase::delFile(string fileName) {
+        if (remove(this->strToChar(this->databasePath + fileName))){
+            return false;
+        }
+        
+        return true;
     }
     
     bool FdbrDatabase::existFile(string fileName) {
-        fstream fs(fileName, ios::in);
+        fstream fs(this->databasePath + fileName, ios::in);
         
-        bool exist = false;
-        if (fs) exist = true;
+        bool result = false;
+        if (fs) result = true;
         
         fs.close();
         
-        return exist;
+        return result;
     }
     
     bool FdbrDatabase::createFile(string fileName) {
-        fstream fs(fileName, ios::out);
+        fstream fs(this->databasePath + fileName, ios::out);
         
-        bool success = false;
-        if (fs) success = true;
+        bool result = false;
+        if (fs) result = true;
         
         fs.close();
         
-        return success;
+        return result;
+    }
+    
+    vector<map<string, string>> FdbrDatabase::read(string fileName) {
+        this->openFile(fileName);
+        vector<map<string, string>> result;
+        
+        char row[1024];
+        while(this->fs.getline(row, 1024)) {
+            map<string, string> data;
+            data["a"] = row;
+            result.push_back(data);
+        }
+        
+        return result;
+    }
+    
+//    bool FdbrDatabase::write(string fileName) {
+//        
+//    }
+//    
+//    bool FdbrDatabase::change(string fileName) {
+//        
+//    }
+//    
+//    bool FdbrDatabase::del(string fileName) {
+//        
+//    }
+    
+    vector<string> FdbrDatabase::head(string fileName) {
+        if (fileName == "") this->openFile(fileName);
+        
+        vector<string> result;
+        
+        char row;
+        this->fs.getline(&row, 1024);
+        
+        result = this->split(string(&row), FDBR_SPLIT_DELIMITER);
+        
+        return result;
     }
 
-    vector<string> FdbrDatabase::split(const string str, string pattern, int limit) {
+    vector<string> FdbrDatabase::split(const string str, string delimiter, int limit) {
         vector<string> elems;
-        string buf = pattern; // Have a buffer string
+        string buf = delimiter; // Have a buffer string
         stringstream ss(str); // Insert the string into a stream
 
         vector<string> tokens; // Create vector to hold our words
@@ -66,25 +142,6 @@ namespace FileDBR {
         writable[str.size()] = '\0'; // don't forget the terminating 0
 
         return writable;
-    }
-
-    void FdbrDatabase::setDatabasePath(string databasePath) {
-        this->databasePath = databasePath;
-    }
-
-    string FdbrDatabase::getDatabasePath() {
-        return this->databasePath;
-    }
-
-    bool FdbrDatabase::openFile(string fileName) {
-        fstream *fs = new fstream(this->databasePath + fileName, ios::in|ios::out);
-
-        if (*fs) {
-            this->files[fileName] = fs;
-            return true;
-        }
-
-        return false;
     }
 
 }

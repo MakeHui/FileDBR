@@ -12,33 +12,40 @@
 
 using namespace std;
 
+#define FDBR_SPLIT_DELIMITER    "┋"
+
 namespace FileDBR {
     class FdbrDatabase {
     public:
         FdbrDatabase();
-        FdbrDatabase(string databasePath);
+        FdbrDatabase(string databasePath, string delimiter = FDBR_SPLIT_DELIMITER);
 
         ~FdbrDatabase();
 
         void setDatabasePath(string databasePath);
         string getDatabasePath();
+        
+        void setDelimiter(string str);
+        string getDelimiter();
 
         bool openFile(string fileName);
-        void closeFile(string fileName);
-        void deleteFile(string fileName);
+        void closeFile();
+        bool delFile(string fileName);
         bool existFile(string fileName);
         bool createFile(string fileName);
         
-        void read(string fileName);
-        void write(string fileName);
-        void change(string fileName);
-        void del(string fileName);
+        vector<map<string, string>> read(string fileName);
+        bool write(string fileName);
+        bool change(string fileName);
+        bool del(string fileName);
 
+        vector<string> head(string fileName = "");
+        
     protected:
         /**
          * string split to array
          */
-        vector<string> split(const string str, string pattern, int limit = 512);
+        vector<string> split(const string str, string delimiter, int limit = 512);
 
         /**
          * string to char
@@ -50,6 +57,9 @@ namespace FileDBR {
 
     private:
         string databasePath;
+        string delimiter;
+        
+        fstream fs;
     };
 }
 
