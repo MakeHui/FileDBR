@@ -55,11 +55,7 @@ namespace FileDBR {
     }
     
     bool FdbrDatabase::delFile(string fileName) {
-        if (remove(this->strToChar(this->databasePath + fileName))){
-            return false;
-        }
-        
-        return true;
+        return 0 == remove(this->strToChar(this->databasePath + fileName));
     }
     
     bool FdbrDatabase::existFile(string fileName) {
@@ -89,6 +85,10 @@ namespace FileDBR {
         vector<map<string, string>> result;
 
         vector<string> headArray = this->head();
+
+        if (headArray.size() == 0) {
+            return result;
+        }
 
         char row[1024];
         while(this->fs.getline(row, 1024)) {
