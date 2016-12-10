@@ -2,7 +2,10 @@
 // Created by MakeHui on 16/12/5.
 //
 
+#include <iostream>
 #include <sstream>
+
+using namespace std;
 
 #include "FdbrDatabase.h"
 
@@ -84,11 +87,17 @@ namespace FileDBR {
     vector<map<string, string>> FdbrDatabase::read(string fileName) {
         this->openFile(fileName);
         vector<map<string, string>> result;
-        
+
+        vector<string> headArray = this->head();
+
         char row[1024];
         while(this->fs.getline(row, 1024)) {
             map<string, string> data;
-            data["a"] = row;
+            vector<string> rowArray = this->split(string(row), FDBR_SPLIT_DELIMITER);
+
+            for (int i = 0; i < rowArray.size(); ++i) {
+                data[headArray[i]] = rowArray[i];
+            }
             result.push_back(data);
         }
         
@@ -108,32 +117,27 @@ namespace FileDBR {
 //    }
     
     vector<string> FdbrDatabase::head(string fileName) {
-        if (fileName == "") this->openFile(fileName);
-        
+        if (fileName != "") this->openFile(fileName);
         vector<string> result;
         
-        char row;
-        this->fs.getline(&row, 1024);
-        
-        result = this->split(string(&row), FDBR_SPLIT_DELIMITER);
+        char row[1024];
+        this->fs.getline(row, 1024);
+        result = this->split(string(row), FDBR_SPLIT_DELIMITER);
         
         return result;
     }
 
     vector<string> FdbrDatabase::split(const string str, string delimiter, int limit) {
-        vector<string> elems;
-        string buf = delimiter; // Have a buffer string
-        stringstream ss(str); // Insert the string into a stream
+        vector<string> result;
 
-        vector<string> tokens; // Create vector to hold our words
-
-        int i = 0;
-        while (ss >> buf) {
-            elems.push_back(buf);
-            i++;
-            if (i == limit) break;
+        stringstream ss;
+        ss.str(str);
+        string item;
+        while (getline(ss, item, *this->strToChar(delimiter))) {
+            result.push_back(item);
         }
-        return elems;
+
+        return result;
     }
 
     char * FdbrDatabase::strToChar(string str) {

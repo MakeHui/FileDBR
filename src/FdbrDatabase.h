@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define FDBR_SPLIT_DELIMITER    "┋"
+#define FDBR_SPLIT_DELIMITER    ","
 
 namespace FileDBR {
     class FdbrDatabase {
