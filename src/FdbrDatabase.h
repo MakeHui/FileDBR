@@ -28,7 +28,7 @@ namespace FileDBR {
         void setDelimiter(string str);
         string getDelimiter();
 
-        bool openFile(string fileName);
+        bool openFile(string fileName, ios_base::openmode openModel = ios_base::in | ios_base::out);
         void closeFile();
         bool delFile(string fileName);
         bool existFile(string fileName);
@@ -36,10 +36,8 @@ namespace FileDBR {
         
         vector<map<string, string>> read(string fileName);
         bool write(string fileName);
-        bool change(string fileName);
-        bool del(string fileName);
 
-        vector<string> head(string fileName = "");
+        bool structure(string fileName);
         
     protected:
         /**
@@ -58,7 +56,10 @@ namespace FileDBR {
     private:
         string databasePath;
         string delimiter;
-        
+
+        vector<map<string, string>> fileData;
+        vector<string> fileStructure;
+
         fstream fs;
     };
 }

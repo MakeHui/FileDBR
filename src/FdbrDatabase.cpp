@@ -21,6 +21,8 @@ namespace FileDBR {
 
     FdbrDatabase::~FdbrDatabase() {
         this->closeFile();
+        this->fileStructure.clear();
+        this->fileData.clear();
     }
     
     void FdbrDatabase::setDatabasePath(string databasePath) {
@@ -39,17 +41,17 @@ namespace FileDBR {
         return this->delimiter;
     }
     
-    bool FdbrDatabase::openFile(string fileName) {
+    bool FdbrDatabase::openFile(string fileName, ios_base::openmode openModel) {
         if (this->fs) this->closeFile();
         
-        this->fs.open(this->databasePath + fileName);
-        
+        this->fs.open(this->databasePath + fileName, openModel);
+
         bool result = false;
         if (this->fs) result = true;
         
         return result;
     }
-    
+
     void FdbrDatabase::closeFile() {
         this->fs.close();
     }
@@ -81,50 +83,72 @@ namespace FileDBR {
     }
     
     vector<map<string, string>> FdbrDatabase::read(string fileName) {
-        this->openFile(fileName);
         vector<map<string, string>> result;
 
-        vector<string> headArray = this->head();
+        if (!this->structure(fileName)) return result;
+        if (!this->openFile(fileName)) return result;
 
-        if (headArray.size() == 0) {
-            return result;
-        }
-
-        char row[1024];
-        while(this->fs.getline(row, 1024)) {
+        string row;
+        int index = 0;
+        while(!this->fs.eof()) {
+            index = index + 1;
+            if (index == 1) {
+                getline(this->fs, row);
+                continue;
+            }
             map<string, string> data;
-            vector<string> rowArray = this->split(string(row), this->delimiter);
+            vector<string> rowArray;
 
+            getline(this->fs, row);
+            if (row.empty()) continue;
+            rowArray = this->split(row, this->delimiter);
+            cout << "key: " << row << endl;
             for (int i = 0; i < rowArray.size(); ++i) {
-                data[headArray[i]] = rowArray[i];
+                data[this->fileStructure[i]] = rowArray[i];
             }
             result.push_back(data);
         }
+
+        this->fileData = result;
         
         return result;
     }
     
-//    bool FdbrDatabase::write(string fileName) {
-//        
-//    }
-//    
-//    bool FdbrDatabase::change(string fileName) {
-//        
-//    }
-//    
-//    bool FdbrDatabase::del(string fileName) {
-//        
-//    }
+    bool FdbrDatabase::write(string fileName) {
+        if (!this->openFile(fileName, ios_base::out)) return false;
+
+        string row = "";
+        for (int i = 0; i < this->fileStructure.size(); ++i) {
+            row = row + this->fileStructure[i] + this->delimiter;
+        }
+        row = row.substr(0, row.length() - 1) + "\n";
+        this->fs.write(row.c_str(), row.size());
+
+        for (int i = 0; i < this->fileData.size(); ++i) {
+            map<string, string>::iterator itr;
+            row = "";
+            for (itr = this->fileData[i].begin(); itr != this->fileData[i].end(); ++itr) {
+                cout << "key: " << itr->first << " value: " << itr->second << endl;
+                row = row + itr->second + this->delimiter;
+            }
+            row = row.substr(0, row.length() - 1) + "\n";
+            this->fs.write(row.c_str(), row.size());
+        }
+
+        return true;
+    }
     
-    vector<string> FdbrDatabase::head(string fileName) {
-        if (fileName != "") this->openFile(fileName);
-        vector<string> result;
+    bool FdbrDatabase::structure(string fileName) {
+        if (!this->openFile(fileName)) return false;
         
-        char row[1024];
-        this->fs.getline(row, 1024);
-        result = this->split(string(row), this->delimiter);
+        string row;
+        getline(this->fs, row);
+
+        if (row.size() == 0) return false;
+
+        this->fileStructure = this->split(row, this->delimiter);
         
-        return result;
+        return this->fileStructure.size() != 0;
     }
 
     vector<string> FdbrDatabase::split(const string str, string delimiter, int limit) {
