@@ -8,12 +8,17 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "FdbrDatabase.h"
 
 using namespace std;
 
 namespace FileDBR {
     class FdbrQueryBuilder {
     public:
+        FdbrQueryBuilder(string databasePath, string delimiter = FDBR_SPLIT_DELIMITER);
+
+        ~FdbrQueryBuilder();
+
         vector<map<string, string>> select(string table, vector<string> columns, map<string, string> where);
 
         bool insert(string table, map<string, string> datas);
@@ -37,7 +42,10 @@ namespace FileDBR {
         vector<map<string, string>> sum(string table, vector<string> columns, map<string, string> where);
 
     private:
-        string databasePath;
+        int vectorSearch(string needle, vector<string> haystack);
+
+    private:
+        FdbrDatabase database;
         bool  debugMode;
         vector<string> logs;
 
