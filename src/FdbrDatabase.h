@@ -55,12 +55,14 @@ namespace FileDBR {
 
     private:
         string databasePath;
+        string databaseFile;
         string delimiter;
 
         vector<map<string, string>> fileData;
         vector<string> fileStructure;
 
         fstream fs;
+        ios_base::openmode currentOpenMode;
     };
 }
 

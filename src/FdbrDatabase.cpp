@@ -42,13 +42,22 @@ namespace FileDBR {
     }
     
     bool FdbrDatabase::openFile(string fileName, ios_base::openmode openModel) {
-        if (this->fs) this->closeFile();
-        
+        if (this->databaseFile == fileName && this->currentOpenMode == openModel && this->fs) {
+            return true;
+        }
+
+        if (this->fs) {
+            this->closeFile();
+        }
+
         this->fs.open(this->databasePath + fileName, openModel);
+        this->currentOpenMode = openModel;
 
         bool result = false;
-        if (this->fs) result = true;
-        
+        if (this->fs) {
+            result = true;
+        }
+
         return result;
     }
 
@@ -64,9 +73,10 @@ namespace FileDBR {
         fstream fs(this->databasePath + fileName, ios::in);
         
         bool result = false;
-        if (fs) result = true;
-        
-        fs.close();
+        if (fs) {
+            fs.close();
+            result = true;
+        }
         
         return result;
     }
@@ -75,18 +85,28 @@ namespace FileDBR {
         fstream fs(this->databasePath + fileName, ios::out);
         
         bool result = false;
-        if (fs) result = true;
-        
-        fs.close();
+        if (fs) {
+            fs.close();
+            result = true;
+        }
         
         return result;
     }
     
     vector<map<string, string>> FdbrDatabase::read(string fileName) {
+        if (this->databaseFile == fileName && this->fileData.size() > 0) {
+            return this->fileData;
+        }
+
         vector<map<string, string>> result;
 
-        if (!this->structure(fileName)) return result;
-        if (!this->openFile(fileName)) return result;
+        if (!this->structure(fileName)) {
+            return result;
+        }
+
+        if (!this->openFile(fileName)){
+            return result;
+        }
 
         string row;
         int index = 0;
@@ -100,9 +120,10 @@ namespace FileDBR {
             vector<string> rowArray;
 
             getline(this->fs, row);
-            if (row.empty()) continue;
+            if (row.empty()) {
+                continue;
+            }
             rowArray = this->split(row, this->delimiter);
-            cout << "key: " << row << endl;
             for (int i = 0; i < rowArray.size(); ++i) {
                 data[this->fileStructure[i]] = rowArray[i];
             }
@@ -115,7 +136,13 @@ namespace FileDBR {
     }
     
     bool FdbrDatabase::write(string fileName) {
-        if (!this->openFile(fileName, ios_base::out)) return false;
+        if (this->fileData.size() == 0) {
+            return false;
+        }
+
+        if (!this->openFile(fileName, ios_base::out|ios_base::trunc)) {
+            return false;
+        }
 
         string row = "";
         for (int i = 0; i < this->fileStructure.size(); ++i) {
@@ -128,10 +155,12 @@ namespace FileDBR {
             map<string, string>::iterator itr;
             row = "";
             for (itr = this->fileData[i].begin(); itr != this->fileData[i].end(); ++itr) {
-                cout << "key: " << itr->first << " value: " << itr->second << endl;
                 row = row + itr->second + this->delimiter;
             }
-            row = row.substr(0, row.length() - 1) + "\n";
+            row = row.substr(0, row.length() - 1);
+            if (i != this->fileData.size() - 1) {
+                row = row + "\n";
+            }
             this->fs.write(row.c_str(), row.size());
         }
 
