@@ -19,7 +19,7 @@ namespace FileDBR {
 
         ~FdbrQueryBuilder();
 
-        vector<map<string, string>> select(string table, vector<string> columns, map<string, string> where);
+        vector<map<string, string>> select(string table, vector<string> columns, map<string, string> where, bool fuzzy = false);
 
         bool insert(string table, map<string, string> datas);
 
@@ -40,9 +40,6 @@ namespace FileDBR {
         vector<map<string, string>> avg(string table, vector<string> columns, map<string, string> where);
 
         vector<map<string, string>> sum(string table, vector<string> columns, map<string, string> where);
-
-    private:
-        int vectorSearch(string needle, vector<string> haystack);
 
     private:
         FdbrDatabase database;
