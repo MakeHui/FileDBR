@@ -20,15 +20,37 @@ namespace FileDBR {
 
     }
 
-    vector<map<string, string>> FdbrQueryBuilder::select(string table, vector<string> columns, map<string, string> where) {
+    vector<map<string, string>> FdbrQueryBuilder::select(string table, vector<string> columns, map<string, string> where, bool fuzzy) {
         vector<map<string, string>> result;
         vector<map<string, string>> allData = this->database.read(table);
 
+        map<string, string>::iterator itr;
         for (int i = 0; i < allData.size(); ++i) {
-            map<string, string>::iterator itr;
-            for (itr = allData[i].begin(); itr != allData[i].end(); ++itr) {
+            for (itr = where.begin(); itr != where.end(); ++itr) {
                 cout << "key: " << itr->first << " value: " << itr->second << endl;
+                if (fuzzy) {
+                    if (allData[i][itr->first].find(itr->second) == string::npos) {
+                        continue;
+                    }
+                }
+                else {
+                    if (allData[i][itr->first] != itr->second) {
+                        continue;
+                    }
+                }
             }
+            
+            map<string, string> column;
+            if (columns.size() != 0) {
+                for (int j = 0; j < columns.size(); ++j) {
+                    column[columns[j]] = allData[i][columns[j]];
+                }
+            }
+            else {
+                column = allData[i];
+            }
+            
+            result.push_back(column);
         }
 
         return result;
@@ -53,15 +75,5 @@ namespace FileDBR {
 //    vector<map<string, string>> FdbrQueryBuilder::avg(string table, vector<string> columns, map<string, string> where);
 //
 //    vector<map<string, string>> FdbrQueryBuilder::sum(string table, vector<string> columns, map<string, string> where);
-
-    int FdbrQueryBuilder::vectorSearch(string needle, vector<string> haystack) {
-        for (int i = 0; i < haystack.size(); ++i) {
-            if (haystack[i] == needle) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
 
 }
