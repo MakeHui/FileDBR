@@ -24,20 +24,27 @@ namespace FileDBR {
         vector<map<string, string>> result;
         vector<map<string, string>> allData = this->database.read(table);
 
+        bool is_continue;
         map<string, string>::iterator itr;
         for (int i = 0; i < allData.size(); ++i) {
+            is_continue = false;
             for (itr = where.begin(); itr != where.end(); ++itr) {
-                cout << "key: " << itr->first << " value: " << itr->second << endl;
                 if (fuzzy) {
                     if (allData[i][itr->first].find(itr->second) == string::npos) {
-                        continue;
+                        is_continue = true;
+                        break;
                     }
                 }
                 else {
                     if (allData[i][itr->first] != itr->second) {
-                        continue;
+                        is_continue = true;
+                        break;
                     }
                 }
+            }
+            
+            if (is_continue) {
+                continue;
             }
             
             map<string, string> column;
