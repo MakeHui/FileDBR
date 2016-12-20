@@ -117,15 +117,15 @@ namespace FileDBR {
                 continue;
             }
             map<string, string> data;
-            vector<string> rowArray;
+            vector<string> rowVector;
 
             getline(this->fs, row);
             if (row.empty()) {
                 continue;
             }
-            rowArray = this->split(row, this->delimiter);
-            for (int i = 0; i < rowArray.size(); ++i) {
-                data[this->fileStructure[i]] = rowArray[i];
+            rowVector = this->split(row, this->delimiter);
+            for (int i = 0; i < rowVector.size(); ++i) {
+                data[this->fileStructure[i]] = rowVector[i];
             }
             result.push_back(data);
         }
