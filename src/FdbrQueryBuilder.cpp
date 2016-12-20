@@ -46,28 +46,7 @@ namespace FileDBR {
         
         for (int i = 0; i < allData.size(); ++i) {
             for (int j = 0; j < _where.size(); ++j) {
-                if (">" == _where[j]["math"] && allData[i][_where[j]["field"]] <= _where[j]["value"]) {
-                    break;
-                }
-                else if (">=" == _where[j]["math"] && allData[i][_where[j]["field"]] < _where[j]["value"]) {
-                    break;
-                }
-                else if ("!" == _where[j]["math"] && allData[i][_where[j]["field"]] == _where[j]["value"]) {
-                    break;
-                }
-                else if ("<" == _where[j]["math"] && allData[i][_where[j]["field"]] >= _where[j]["value"]) {
-                    break;
-                }
-                else if ("<=" == _where[j]["math"] && allData[i][_where[j]["field"]] > _where[j]["value"]) {
-                    break;
-                }
-                else if ("~" == _where[j]["math"] && allData[i][_where[j]["field"]].find(_where[j]["value"]) == string::npos) {
-                    break;
-                }
-                else if ("!~" == _where[j]["math"] && allData[i][_where[j]["field"]].find(_where[j]["value"]) != string::npos) {
-                    break;
-                }
-                else if ("=" == _where[j]["math"] && allData[i][_where[j]["field"]] != _where[j]["value"]) {
+                if (!this->whereCompare(allData[i][_where[j]["field"]], _where[j]["value"], _where[j]["math"])) {
                     break;
                 }
             }
@@ -108,7 +87,34 @@ namespace FileDBR {
 //
 //    vector<map<string, string>> FdbrQueryBuilder::sum(string table, vector<string> columns, map<string, string> where);
 
-    
+    bool FdbrQueryBuilder::whereCompare(string str, string str1, string math) {
+        if (">" == math && str <= str1) {
+            return false;
+        }
+        else if (">=" == math && str < str1) {
+            return false;
+        }
+        else if ("!" == math && str == str1) {
+            return false;
+        }
+        else if ("<" == math && str >= str1) {
+            return false;
+        }
+        else if ("<=" == math && str > str1) {
+            return false;
+        }
+        else if ("~" == math && str.find(str1) == string::npos) {
+            return false;
+        }
+        else if ("!~" == math && str.find(str1) != string::npos) {
+            return false;
+        }
+        else if ("=" == math && str != str1) {
+            return false;
+        }
+        
+        return true;
+    }
     
     vector<string> FdbrQueryBuilder::split(const string str, string delimiter, int limit) {
         vector<string> result;

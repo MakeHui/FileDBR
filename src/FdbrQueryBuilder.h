@@ -42,6 +42,8 @@ namespace FileDBR {
         vector<map<string, string>> sum(string table, vector<string> columns, map<string, string> where);
         
     protected:
+        bool whereCompare(string str, string str2, string math);
+        
         vector<string> split(const string str, string delimiter, int limit = 512);
         
         char * strToChar(string str);
