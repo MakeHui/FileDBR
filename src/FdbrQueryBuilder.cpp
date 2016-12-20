@@ -44,11 +44,18 @@ namespace FileDBR {
             _where.push_back(thisWhere);
         }
         
+        bool isContinue;
         for (int i = 0; i < allData.size(); ++i) {
+            isContinue = false;
             for (int j = 0; j < _where.size(); ++j) {
                 if (!this->whereCompare(allData[i][_where[j]["field"]], _where[j]["value"], _where[j]["math"])) {
+                    isContinue = true;
                     break;
                 }
+            }
+            
+            if (isContinue) {
+                continue;
             }
             
             map<string, string> column;
