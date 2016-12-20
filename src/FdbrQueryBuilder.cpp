@@ -8,7 +8,6 @@
 #include "FdbrQueryBuilder.h"
 
 using namespace std;
-using namespace FileDBR;
 
 namespace FileDBR {
     
