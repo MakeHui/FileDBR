@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <sstream>
 
 #include "FdbrQueryBuilder.h"
 
@@ -10,40 +11,91 @@ using namespace std;
 using namespace FileDBR;
 
 namespace FileDBR {
-
+    
     FdbrQueryBuilder::FdbrQueryBuilder(string databasePath, string delimiter) {
         this->database.setDatabasePath(databasePath);
         this->database.setDelimiter(delimiter);
+        
+        this->maths = {">", ">=", "!", "<", "<=", "~", "!~"};
     }
 
     FdbrQueryBuilder::~FdbrQueryBuilder() {
 
     }
 
-    vector<map<string, string>> FdbrQueryBuilder::select(string table, vector<string> columns, map<string, string> where, bool fuzzy) {
-        vector<map<string, string>> result;
+    vector<map<string, string>> FdbrQueryBuilder::select(string table, vector<string> columns, map<string, string> where) {
         vector<map<string, string>> allData = this->database.read(table);
-
-        bool is_continue;
+        vector<map<string, string>> result;
+        vector<map<string, string>> _where;
+        
         map<string, string>::iterator itr;
+        
+        for (itr = where.begin(); itr != where.end(); ++itr) {
+            vector<string> firstWhere = split(itr->first, " ");
+            map<string, string> thisWhere;
+            
+            thisWhere["field"] = firstWhere[0];
+            thisWhere["value"] = itr->second;
+            thisWhere["math"] =  (firstWhere.size() == 2) ? firstWhere[1] : "=";
+            
+            _where.push_back(thisWhere);
+        }
+        
+        bool eligible;
         for (int i = 0; i < allData.size(); ++i) {
-            is_continue = false;
-            for (itr = where.begin(); itr != where.end(); ++itr) {
-                if (fuzzy) {
-                    if (allData[i][itr->first].find(itr->second) == string::npos) {
-                        is_continue = true;
+            eligible = true;
+            for (int j = 0; j < _where.size(); ++j) {
+                if (">" == _where[j]["math"]) {
+                    if (allData[i][_where[j]["field"]] <= _where[j]["value"]) {
+                        eligible = false;
+                        break;
+                    }
+                }
+                else if (">=" == _where[j]["math"]) {
+                    if (allData[i][_where[j]["field"]] < _where[j]["value"]) {
+                        eligible = false;
+                        break;
+                    }
+                }
+                else if ("!" == _where[j]["math"]) {
+                    if (allData[i][_where[j]["field"]] == _where[j]["value"]) {
+                        eligible = false;
+                        break;
+                    }
+                }
+                else if ("<" == _where[j]["math"]) {
+                    if (allData[i][_where[j]["field"]] >= _where[j]["value"]) {
+                        eligible = false;
+                        break;
+                    }
+                }
+                else if ("<=" == _where[j]["math"]) {
+                    if (allData[i][_where[j]["field"]] > _where[j]["value"]) {
+                        eligible = false;
+                        break;
+                    }
+                }
+                else if ("~" == _where[j]["math"]) {
+                    if (allData[i][_where[j]["field"]].find(_where[j]["value"]) == string::npos) {
+                        eligible = false;
+                        break;
+                    }
+                }
+                else if ("!~" == _where[j]["math"]) {
+                    if (allData[i][_where[j]["field"]].find(_where[j]["value"]) != string::npos) {
+                        eligible = false;
                         break;
                     }
                 }
                 else {
-                    if (allData[i][itr->first] != itr->second) {
-                        is_continue = true;
+                    if (allData[i][_where[j]["field"]] != _where[j]["value"]) {
+                        eligible = false;
                         break;
                     }
                 }
             }
             
-            if (is_continue) {
+            if (!eligible) {
                 continue;
             }
             
@@ -83,4 +135,33 @@ namespace FileDBR {
 //
 //    vector<map<string, string>> FdbrQueryBuilder::sum(string table, vector<string> columns, map<string, string> where);
 
+    
+    
+    vector<string> FdbrQueryBuilder::split(const string str, string delimiter, int limit) {
+        vector<string> result;
+        stringstream ss;
+        ss.str(str);
+        string item;
+        int i = 0;
+        
+        while (getline(ss, item, *this->strToChar(delimiter))) {
+            result.push_back(item);
+            if (i == limit) break;
+        }
+        
+        return result;
+    }
+    
+    char * FdbrQueryBuilder::strToChar(string str) {
+        char * writable = new char[str.size() + 1];
+        std::copy(str.begin(), str.end(), writable);
+        writable[str.size()] = '\0'; // don't forget the terminating 0
+        
+        return writable;
+    }
+    
+    bool FdbrQueryBuilder::inVector(string needle, vector<string> &haystack) {
+        return find(haystack.begin(), haystack.end(), needle) != haystack.end();
+    }
+    
 }

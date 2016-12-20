@@ -148,7 +148,7 @@ namespace FileDBR {
         for (int i = 0; i < this->fileStructure.size(); ++i) {
             row = row + this->fileStructure[i] + this->delimiter;
         }
-        row = row.substr(0, row.length() - 1) + "\n";
+        row = row + "\n";
         this->fs.write(row.c_str(), row.size());
 
         for (int i = 0; i < this->fileData.size(); ++i) {
@@ -157,7 +157,7 @@ namespace FileDBR {
             for (itr = this->fileData[i].begin(); itr != this->fileData[i].end(); ++itr) {
                 row = row + itr->second + this->delimiter;
             }
-            row = row.substr(0, row.length() - 1);
+            
             if (i != this->fileData.size() - 1) {
                 row = row + "\n";
             }

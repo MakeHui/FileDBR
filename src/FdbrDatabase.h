@@ -40,14 +40,8 @@ namespace FileDBR {
         bool structure(string fileName);
         
     protected:
-        /**
-         * string split to array
-         */
         vector<string> split(const string str, string delimiter, int limit = 512);
 
-        /**
-         * string to char
-         */
         char * strToChar(string str);
 
     public:
