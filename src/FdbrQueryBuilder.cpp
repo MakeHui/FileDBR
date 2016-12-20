@@ -16,7 +16,7 @@ namespace FileDBR {
         this->database.setDatabasePath(databasePath);
         this->database.setDelimiter(delimiter);
         
-        this->maths = {">", ">=", "!", "<", "<=", "~", "!~"};
+        this->maths = {">", ">=", "!", "<", "<=", "~", "!~", "="};
     }
 
     FdbrQueryBuilder::~FdbrQueryBuilder() {
@@ -37,66 +37,39 @@ namespace FileDBR {
             thisWhere["field"] = firstWhere[0];
             thisWhere["value"] = itr->second;
             thisWhere["math"] =  (firstWhere.size() == 2) ? firstWhere[1] : "=";
+            if (!this->inVector(thisWhere["math"], this->maths)) {
+                thisWhere["math"] = "=";
+            }
             
             _where.push_back(thisWhere);
         }
         
-        bool eligible;
         for (int i = 0; i < allData.size(); ++i) {
-            eligible = true;
             for (int j = 0; j < _where.size(); ++j) {
-                if (">" == _where[j]["math"]) {
-                    if (allData[i][_where[j]["field"]] <= _where[j]["value"]) {
-                        eligible = false;
-                        break;
-                    }
+                if (">" == _where[j]["math"] && allData[i][_where[j]["field"]] <= _where[j]["value"]) {
+                    break;
                 }
-                else if (">=" == _where[j]["math"]) {
-                    if (allData[i][_where[j]["field"]] < _where[j]["value"]) {
-                        eligible = false;
-                        break;
-                    }
+                else if (">=" == _where[j]["math"] && allData[i][_where[j]["field"]] < _where[j]["value"]) {
+                    break;
                 }
-                else if ("!" == _where[j]["math"]) {
-                    if (allData[i][_where[j]["field"]] == _where[j]["value"]) {
-                        eligible = false;
-                        break;
-                    }
+                else if ("!" == _where[j]["math"] && allData[i][_where[j]["field"]] == _where[j]["value"]) {
+                    break;
                 }
-                else if ("<" == _where[j]["math"]) {
-                    if (allData[i][_where[j]["field"]] >= _where[j]["value"]) {
-                        eligible = false;
-                        break;
-                    }
+                else if ("<" == _where[j]["math"] && allData[i][_where[j]["field"]] >= _where[j]["value"]) {
+                    break;
                 }
-                else if ("<=" == _where[j]["math"]) {
-                    if (allData[i][_where[j]["field"]] > _where[j]["value"]) {
-                        eligible = false;
-                        break;
-                    }
+                else if ("<=" == _where[j]["math"] && allData[i][_where[j]["field"]] > _where[j]["value"]) {
+                    break;
                 }
-                else if ("~" == _where[j]["math"]) {
-                    if (allData[i][_where[j]["field"]].find(_where[j]["value"]) == string::npos) {
-                        eligible = false;
-                        break;
-                    }
+                else if ("~" == _where[j]["math"] && allData[i][_where[j]["field"]].find(_where[j]["value"]) == string::npos) {
+                    break;
                 }
-                else if ("!~" == _where[j]["math"]) {
-                    if (allData[i][_where[j]["field"]].find(_where[j]["value"]) != string::npos) {
-                        eligible = false;
-                        break;
-                    }
+                else if ("!~" == _where[j]["math"] && allData[i][_where[j]["field"]].find(_where[j]["value"]) != string::npos) {
+                    break;
                 }
-                else {
-                    if (allData[i][_where[j]["field"]] != _where[j]["value"]) {
-                        eligible = false;
-                        break;
-                    }
+                else if ("=" == _where[j]["math"] && allData[i][_where[j]["field"]] != _where[j]["value"]) {
+                    break;
                 }
-            }
-            
-            if (!eligible) {
-                continue;
             }
             
             map<string, string> column;
