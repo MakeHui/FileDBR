@@ -4,14 +4,13 @@
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 #include "FdbrQueryBuilder.h"
 
-using namespace std;
-
 namespace FileDBR {
     
-    FdbrQueryBuilder::FdbrQueryBuilder(string databasePath, string delimiter) {
+    FdbrQueryBuilder::FdbrQueryBuilder(std::string databasePath, std::string delimiter) {
         this->database.setDatabasePath(databasePath);
         this->database.setDelimiter(delimiter);
         
@@ -22,16 +21,15 @@ namespace FileDBR {
 
     }
 
-    vector<map<string, string>> FdbrQueryBuilder::select(string table, vector<string> columns, map<string, string> where, map<string, string> order) {
-        vector<map<string, string>> allData = this->database.read(table);
-        vector<map<string, string>> result;
-        vector<map<string, string>> _where;
-        
-        map<string, string>::iterator itr;
+    std::vector<std::map<std::string, std::string>> FdbrQueryBuilder::select(std::string table, std::vector<std::string> columns, std::map<std::string, std::string> where, std::map<std::string, std::string> order) {
+        std::vector<std::map<std::string, std::string>> fileData = this->database.read(table);
+        std::vector<std::map<std::string, std::string>> result;
+        std::vector<std::map<std::string, std::string>> _where;
+        std::map<std::string, std::string>::iterator itr;
         
         for (itr = where.begin(); itr != where.end(); ++itr) {
-            vector<string> firstWhere = split(itr->first, " ");
-            map<string, string> thisWhere;
+            std::vector<std::string> firstWhere = split(itr->first, " ");
+            std::map<std::string, std::string> thisWhere;
             
             thisWhere["field"] = firstWhere[0];
             thisWhere["value"] = itr->second;
@@ -44,10 +42,10 @@ namespace FileDBR {
         }
         
         bool isContinue;
-        for (int i = 0; i < allData.size(); ++i) {
+        for (int i = 0; i < fileData.size(); ++i) {
             isContinue = false;
             for (int j = 0; j < _where.size(); ++j) {
-                if (!this->whereCompare(allData[i][_where[j]["field"]], _where[j]["value"], _where[j]["math"])) {
+                if (!this->whereCompare(fileData[i][_where[j]["field"]], _where[j]["value"], _where[j]["math"])) {
                     isContinue = true;
                     break;
                 }
@@ -57,63 +55,213 @@ namespace FileDBR {
                 continue;
             }
             
-            result.push_back(allData[i]);
+            result.push_back(fileData[i]);
         }
         
         if (order.size() != 0) {
             this->sortMethod(result, order);
         }
-        
-        // todo: columns
-//        map<string, string> column;
-//        if (columns.size() != 0) {
-//            for (int j = 0; j < columns.size(); ++j) {
-//                column[columns[j]] = allData[i][columns[j]];
-//            }
-//        }
-//        else {
-//            column = allData[i];
-//        }
+
+        if (columns.size() != 0) {
+            for (int i = 0; i < result.size(); ++i) {
+                std::map<std::string, std::string> column;
+                for (int j = 0; j < columns.size(); ++j) {
+                    column[columns[j]] = result[i][columns[j]];
+                }
+                result[i] = column;
+            }
+        }
 
         return result;
     }
 
-//    bool FdbrQueryBuilder::insert(string table, map<string, string> datas);
-//
-//    bool FdbrQueryBuilder::updatet(string table, map<string, string> datas, map<string, string> where);
-//
-//    bool FdbrQueryBuilder::del(string table, map<string, string> where);
-//
-    map<string, string> FdbrQueryBuilder::get(string table, vector<string> columns, map<string, string> where, map<string, string> order) {
-        vector<map<string, string>> allData = this->select(table, columns, where, order);
-        map<string, string> result;
+    bool FdbrQueryBuilder::insert(std::string table, std::map<std::string, std::string> datas) {
+        std::vector<std::map<std::string, std::string>> fileData = this->select(table);
+        std::vector<std::string> structure = this->database.getFileStructure();
+        std::map<std::string, std::string> rowData;
+        std::map<std::string, std::string>::iterator itr;
+
+        for (int i = 0; i < structure.size(); ++i) {
+            rowData[structure[i]] = "";
+        }
+
+        for (itr = datas.begin(); itr != datas.end(); ++itr) {
+            rowData[itr->first] = itr->second;
+        }
+
+        fileData.push_back(rowData);
+        this->database.setFileData(fileData);
+        this->database.write(table);
+
+        return true;
+    }
+
+    int FdbrQueryBuilder::update(std::string table, std::map<std::string, std::string> datas, std::map<std::string, std::string> where) {
+        std::vector<std::map<std::string, std::string>> fileData = this->database.read(table);
+        std::vector<std::map<std::string, std::string>> result;
+        std::vector<std::map<std::string, std::string>> _where;
+        std::map<std::string, std::string>::iterator itr;
+
+        for (itr = where.begin(); itr != where.end(); ++itr) {
+            std::vector<std::string> firstWhere = split(itr->first, " ");
+            std::map<std::string, std::string> thisWhere;
+
+            thisWhere["field"] = firstWhere[0];
+            thisWhere["value"] = itr->second;
+            thisWhere["math"] =  (firstWhere.size() == 2) ? firstWhere[1] : "=";
+            if (!this->inVector(thisWhere["math"], this->maths)) {
+                thisWhere["math"] = "=";
+            }
+
+            _where.push_back(thisWhere);
+        }
+
+        int lines = 0;
+        bool isContinue;
+        for (int i = 0; i < fileData.size(); ++i) {
+            isContinue = false;
+            for (int j = 0; j < _where.size(); ++j) {
+                if (!this->whereCompare(fileData[i][_where[j]["field"]], _where[j]["value"], _where[j]["math"])) {
+                    isContinue = true;
+                    break;
+                }
+            }
+
+            if (isContinue) {
+                continue;
+            }
+
+            for (int j = 0; j < _where.size(); ++j) {
+                fileData[i][_where[j]["field"]] = _where[j]["value"];
+            }
+
+            lines++;
+        }
+
+        this->database.setFileData(fileData);
+        this->database.write(table);
+
+        return lines;
+    }
+
+    int FdbrQueryBuilder::del(std::string table, std::map<std::string, std::string> where) {
+        std::vector<std::map<std::string, std::string>> fileData = this->database.read(table);
+        std::vector<std::map<std::string, std::string>> result;
+        std::vector<std::map<std::string, std::string>> _where;
+        std::map<std::string, std::string>::iterator itr;
+
+        for (itr = where.begin(); itr != where.end(); ++itr) {
+            std::vector<std::string> firstWhere = split(itr->first, " ");
+            std::map<std::string, std::string> thisWhere;
+
+            thisWhere["field"] = firstWhere[0];
+            thisWhere["value"] = itr->second;
+            thisWhere["math"] =  (firstWhere.size() == 2) ? firstWhere[1] : "=";
+            if (!this->inVector(thisWhere["math"], this->maths)) {
+                thisWhere["math"] = "=";
+            }
+
+            _where.push_back(thisWhere);
+        }
+
+        int lines = 0;
+        bool isContinue;
+        for (int i = 0; i < fileData.size(); ++i) {
+            isContinue = false;
+            for (int j = 0; j < _where.size(); ++j) {
+                if (!this->whereCompare(fileData[i][_where[j]["field"]], _where[j]["value"], _where[j]["math"])) {
+                    isContinue = true;
+                    break;
+                }
+            }
+
+            if (isContinue) {
+                continue;
+            }
+
+            fileData.erase(fileData.begin() + i);
+
+            lines++;
+        }
+
+        this->database.setFileData(fileData);
+        this->database.write(table);
+
+        return lines;
+    }
+
+    std::map<std::string, std::string> FdbrQueryBuilder::get(std::string table, std::vector<std::string> columns, std::map<std::string, std::string> where, std::map<std::string, std::string> order) {
+        std::vector<std::map<std::string, std::string>> fileData = this->select(table, columns, where, order);
+        std::map<std::string, std::string> result;
         
-        if (allData.size() != 0) {
-            result = allData[0];
+        if (fileData.size() != 0) {
+            result = fileData[0];
         }
         
         return result;
     }
-//
-//    bool FdbrQueryBuilder::has(string table, map<string, string> where);
-//
-//    bool FdbrQueryBuilder::count(string table, map<string, string> where);
-//
-//    vector<map<string, string>> FdbrQueryBuilder::max(string table, vector<string> columns, map<string, string> where);
-//
-//    vector<map<string, string>> FdbrQueryBuilder::min(string table, vector<string> columns, map<string, string> where);
-//
-//    vector<map<string, string>> FdbrQueryBuilder::avg(string table, vector<string> columns, map<string, string> where);
-//
-//    vector<map<string, string>> FdbrQueryBuilder::sum(string table, vector<string> columns, map<string, string> where);
-    
-     bool FdbrQueryBuilder::sortMethod(std::vector<std::map<std::string,std::string>> &data, std::map<std::string, std::string> order) {
-         map<string, string>::iterator itr = order.begin();
-         transform(itr->second.begin(), itr->second.end(), itr->second.begin(), ::toupper);
+
+    bool FdbrQueryBuilder::has(std::string table, std::map<std::string, std::string> where) {
+        std::vector<std::map<std::string, std::string>> fileData = this->select(table, {}, where);
+
+        return fileData.size() != 0;
+    }
+
+    unsigned int FdbrQueryBuilder::count(std::string table, std::map<std::string, std::string> where) {
+        std::vector<std::map<std::string, std::string>> fileData = this->select(table, {}, where);
+
+        return fileData.size();
+    }
+
+    std::string FdbrQueryBuilder::max(std::string table, std::string column, std::map<std::string, std::string> where) {
+        std::vector<std::map<std::string, std::string>> fileData = this->select(table, {column}, where, {{column, "DESC"}});
+
+        if (fileData.size() != 0) {
+            return fileData[0][column];
+        }
+
+        return "";
+    }
+
+    std::string FdbrQueryBuilder::min(std::string table, std::string column, std::map<std::string, std::string> where) {
+        std::vector<std::map<std::string, std::string>> fileData = this->select(table, {column}, where, {{column, "ASC"}});
+
+        if (fileData.size() != 0) {
+            return fileData[0][column];
+        }
+
+        return "";
+    }
+
+    long double FdbrQueryBuilder::avg(std::string table, std::string column, std::map<std::string, std::string> where) {
+        std::vector<std::map<std::string, std::string>> fileData = this->select(table, {column}, where);
+        double sum = 0.0;
+
+        for (int i = 0; i < fileData.size(); ++i) {
+            sum += std::atof(fileData[i][column].c_str());
+        }
+
+        return sum / fileData.size();
+    }
+
+    long double FdbrQueryBuilder::sum(std::string table, std::string column, std::map<std::string, std::string> where) {
+        std::vector<std::map<std::string, std::string>> fileData = this->select(table, {column}, where);
+        double sum = 0.0;
+
+        for (int i = 0; i < fileData.size(); ++i) {
+            sum += std::atof(fileData[i][column].c_str());
+        }
+
+        return sum;
+    }
+
+    bool FdbrQueryBuilder::sortMethod(std::vector<std::map<std::string,std::string>> &data, std::map<std::string, std::string> order) {
+         std::map<std::string, std::string>::iterator itr = order.begin();
+         std::transform(itr->second.begin(), itr->second.end(), itr->second.begin(), ::toupper);
          
-         std::sort(data.begin(), data.end(), [&](std::map<string,string> first, std::map<string,string> second) {
-             long int firstInt = std::atoi(first["a"].c_str());
-             long int secondInt = std::atoi(second["a"].c_str());
+         std::sort(data.begin(), data.end(), [&](std::map<std::string, std::string> first, std::map<std::string, std::string> second) {
+             long int firstInt = std::atoi(first[itr->first].c_str());
+             long int secondInt = std::atoi(second[itr->first].c_str());
              
              if (errno == 0) {
                  if (itr->second == "ASC") {
@@ -125,10 +273,10 @@ namespace FileDBR {
              }
              else {
                  if (itr->second == "ASC") {
-                     return first["a"] < second["a"];
+                     return first["a"] < second[itr->first];
                  }
                  else {
-                     return first["a"] > second["a"];
+                     return first[itr->first] > second[itr->first];
                  }
              }
          });
@@ -136,7 +284,7 @@ namespace FileDBR {
          return true;
     }
 
-    bool FdbrQueryBuilder::whereCompare(string str, string str1, string math) {
+    bool FdbrQueryBuilder::whereCompare(std::string str, std::string str1, std::string math) {
         if (">" == math && str <= str1) {
             return false;
         }
@@ -152,10 +300,10 @@ namespace FileDBR {
         else if ("<=" == math && str > str1) {
             return false;
         }
-        else if ("~" == math && str.find(str1) == string::npos) {
+        else if ("~" == math && str.find(str1) == std::string::npos) {
             return false;
         }
-        else if ("!~" == math && str.find(str1) != string::npos) {
+        else if ("!~" == math && str.find(str1) != std::string::npos) {
             return false;
         }
         else if ("=" == math && str != str1) {
@@ -164,12 +312,12 @@ namespace FileDBR {
         
         return true;
     }
-    
-    vector<string> FdbrQueryBuilder::split(const string str, string delimiter, int limit) {
-        vector<string> result;
-        stringstream ss;
+
+    std::vector<std::string> FdbrQueryBuilder::split(const std::string str, std::string delimiter, int limit) {
+        std::vector<std::string> result;
+        std::stringstream ss;
         ss.str(str);
-        string item;
+        std::string item;
         int i = 0;
         
         while (getline(ss, item, *this->strToChar(delimiter))) {
@@ -180,7 +328,7 @@ namespace FileDBR {
         return result;
     }
     
-    char * FdbrQueryBuilder::strToChar(string str) {
+    char * FdbrQueryBuilder::strToChar(std::string str) {
         char * writable = new char[str.size() + 1];
         std::copy(str.begin(), str.end(), writable);
         writable[str.size()] = '\0'; // don't forget the terminating 0
@@ -188,8 +336,8 @@ namespace FileDBR {
         return writable;
     }
     
-    bool FdbrQueryBuilder::inVector(string needle, vector<string> &haystack) {
-        return find(haystack.begin(), haystack.end(), needle) != haystack.end();
+    bool FdbrQueryBuilder::inVector(std::string needle, std::vector<std::string> &haystack) {
+        return std::find(haystack.begin(), haystack.end(), needle) != haystack.end();
     }
     
 }

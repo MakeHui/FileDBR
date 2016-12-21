@@ -10,53 +10,56 @@
 #include <vector>
 #include <map>
 
-using namespace std;
-
 #define FDBR_SPLIT_DELIMITER    ","
 
 namespace FileDBR {
     class FdbrDatabase {
     public:
         FdbrDatabase();
-        FdbrDatabase(string databasePath, string delimiter = FDBR_SPLIT_DELIMITER);
+        FdbrDatabase(std::string databasePath, std::string delimiter = FDBR_SPLIT_DELIMITER);
 
         ~FdbrDatabase();
 
-        void setDatabasePath(string databasePath);
-        string getDatabasePath();
+        void setDatabasePath(std::string databasePath);
+        std::string getDatabasePath();
         
-        void setDelimiter(string str);
-        string getDelimiter();
+        void setDelimiter(std::string str);
+        std::string getDelimiter();
 
-        bool openFile(string fileName, ios_base::openmode openModel = ios_base::in | ios_base::out);
+        std::vector<std::map<std::string, std::string>> getFileData();
+        void setFileData(std::vector<std::map<std::string, std::string>> fileData);
+
+        std::vector<std::string> getFileStructure();
+
+        bool openFile(std::string fileName, std::ios_base::openmode openModel = std::ios_base::in|std::ios_base::out);
         void closeFile();
-        bool delFile(string fileName);
-        bool existFile(string fileName);
-        bool createFile(string fileName);
+        bool delFile(std::string fileName);
+        bool existFile(std::string fileName);
+        bool createFile(std::string fileName);
         
-        vector<map<string, string>> read(string fileName);
-        bool write(string fileName);
+        std::vector<std::map<std::string, std::string>> read(std::string fileName);
+        bool write(std::string fileName);
 
-        bool structure(string fileName);
+        bool structure(std::string fileName);
         
     protected:
-        vector<string> split(const string str, string delimiter, int limit = 512);
+        std::vector<std::string> split(const std::string str, std::string delimiter, int limit = 512);
 
-        char * strToChar(string str);
+        char * strToChar(std::string str);
 
     public:
-        map<string, fstream *> files;
+        std::map<std::string, std::fstream *> files;
 
     private:
-        string databasePath;
-        string databaseFile;
-        string delimiter;
+        std::string databasePath;
+        std::string databaseFile;
+        std::string delimiter;
 
-        vector<map<string, string>> fileData;
-        vector<string> fileStructure;
+        std::vector<std::map<std::string, std::string>> fileData;
+        std::vector<std::string> fileStructure;
 
-        fstream fs;
-        ios_base::openmode currentOpenMode;
+        std::fstream fs;
+        std::ios_base::openmode currentOpenMode;
     };
 }
 

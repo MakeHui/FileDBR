@@ -8,55 +8,54 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "FdbrDatabase.h"
 
-using namespace std;
+#include "FdbrDatabase.h"
 
 namespace FileDBR {
     class FdbrQueryBuilder {
     public:
-        FdbrQueryBuilder(string databasePath, string delimiter = FDBR_SPLIT_DELIMITER);
+        FdbrQueryBuilder(std::string databasePath, std::string delimiter = FDBR_SPLIT_DELIMITER);
 
         ~FdbrQueryBuilder();
 
-        vector<map<string, string>> select(string table, vector<string> columns = {}, map<string, string> where = {}, map<string, string> order = {});
+        std::vector<std::map<std::string, std::string>> select(std::string table, std::vector<std::string> columns = {}, std::map<std::string, std::string> where = {}, std::map<std::string, std::string> order = {});
 
-        bool insert(string table, map<string, string> datas);
+        bool insert(std::string table, std::map<std::string, std::string> datas);
 
-        bool updatet(string table, map<string, string> datas, map<string, string> where);
+        int update(std::string table, std::map<std::string, std::string> datas, std::map<std::string, std::string> where);
 
-        bool del(string table, map<string, string> where);
+        int del(std::string table, std::map<std::string, std::string> where);
 
-        map<string, string> get(string table, vector<string> columns = {}, map<string, string> where = {}, map<string, string> order = {});
+        std::map<std::string, std::string> get(std::string table, std::vector<std::string> columns = {}, std::map<std::string, std::string> where = {}, std::map<std::string, std::string> order = {});
 
-        bool has(string table, map<string, string> where);
+        bool has(std::string table, std::map<std::string, std::string> where);
 
-        bool count(string table, map<string, string> where);
+        unsigned int count(std::string table, std::map<std::string, std::string> where);
 
-        vector<map<string, string>> max(string table, vector<string> columns, map<string, string> where);
+        std::string max(std::string table, std::string column, std::map<std::string, std::string> where);
 
-        vector<map<string, string>> min(string table, vector<string> columns, map<string, string> where);
+        std::string min(std::string table, std::string column, std::map<std::string, std::string> where);
 
-        vector<map<string, string>> avg(string table, vector<string> columns, map<string, string> where);
+        long double avg(std::string table, std::string column, std::map<std::string, std::string> where);
 
-        vector<map<string, string>> sum(string table, vector<string> columns, map<string, string> where);
+        long double sum(std::string table, std::string column, std::map<std::string, std::string> where);
         
     protected:
         bool sortMethod(std::vector<std::map<std::string,std::string>> &data, std::map<std::string, std::string> order);
         
-        bool whereCompare(string str, string str2, string math);
+        bool whereCompare(std::string str, std::string str2, std::string math);
+
+        std::vector<std::string> split(const std::string str, std::string delimiter, int limit = 512);
         
-        vector<string> split(const string str, string delimiter, int limit = 512);
+        char * strToChar(std::string str);
         
-        char * strToChar(string str);
-        
-        bool inVector(string needle, vector<string> &haystack);
+        bool inVector(std::string needle, std::vector<std::string> &haystack);
         
     private:
         FdbrDatabase database;
         bool debugMode;
-        vector<string> logs;
-        vector<string> maths;
+        std::vector<std::string> logs;
+        std::vector<std::string> maths;
     };
 }
 
