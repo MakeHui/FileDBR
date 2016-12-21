@@ -19,7 +19,7 @@ namespace FileDBR {
 
         ~FdbrQueryBuilder();
 
-        vector<map<string, string>> select(string table, vector<string> columns, map<string, string> where);
+        vector<map<string, string>> select(string table, vector<string> columns = {}, map<string, string> where = {}, map<string, string> order = {});
 
         bool insert(string table, map<string, string> datas);
 
@@ -27,7 +27,7 @@ namespace FileDBR {
 
         bool del(string table, map<string, string> where);
 
-        vector<map<string, string>> get(string table, vector<string> columns, map<string, string> where);
+        map<string, string> get(string table, vector<string> columns = {}, map<string, string> where = {}, map<string, string> order = {});
 
         bool has(string table, map<string, string> where);
 
@@ -42,6 +42,8 @@ namespace FileDBR {
         vector<map<string, string>> sum(string table, vector<string> columns, map<string, string> where);
         
     protected:
+        bool sortMethod(std::vector<std::map<std::string,std::string>> &data, std::map<std::string, std::string> order);
+        
         bool whereCompare(string str, string str2, string math);
         
         vector<string> split(const string str, string delimiter, int limit = 512);

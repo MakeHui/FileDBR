@@ -22,7 +22,7 @@ namespace FileDBR {
 
     }
 
-    vector<map<string, string>> FdbrQueryBuilder::select(string table, vector<string> columns, map<string, string> where) {
+    vector<map<string, string>> FdbrQueryBuilder::select(string table, vector<string> columns, map<string, string> where, map<string, string> order) {
         vector<map<string, string>> allData = this->database.read(table);
         vector<map<string, string>> result;
         vector<map<string, string>> _where;
@@ -57,18 +57,23 @@ namespace FileDBR {
                 continue;
             }
             
-            map<string, string> column;
-            if (columns.size() != 0) {
-                for (int j = 0; j < columns.size(); ++j) {
-                    column[columns[j]] = allData[i][columns[j]];
-                }
-            }
-            else {
-                column = allData[i];
-            }
-            
-            result.push_back(column);
+            result.push_back(allData[i]);
         }
+        
+        if (order.size() != 0) {
+            this->sortMethod(result, order);
+        }
+        
+        // todo: columns
+//        map<string, string> column;
+//        if (columns.size() != 0) {
+//            for (int j = 0; j < columns.size(); ++j) {
+//                column[columns[j]] = allData[i][columns[j]];
+//            }
+//        }
+//        else {
+//            column = allData[i];
+//        }
 
         return result;
     }
@@ -79,7 +84,16 @@ namespace FileDBR {
 //
 //    bool FdbrQueryBuilder::del(string table, map<string, string> where);
 //
-//    vector<map<string, string>> FdbrQueryBuilder::get(string table, vector<string> columns, map<string, string> where);
+    map<string, string> FdbrQueryBuilder::get(string table, vector<string> columns, map<string, string> where, map<string, string> order) {
+        vector<map<string, string>> allData = this->select(table, columns, where, order);
+        map<string, string> result;
+        
+        if (allData.size() != 0) {
+            result = allData[0];
+        }
+        
+        return result;
+    }
 //
 //    bool FdbrQueryBuilder::has(string table, map<string, string> where);
 //
@@ -92,6 +106,35 @@ namespace FileDBR {
 //    vector<map<string, string>> FdbrQueryBuilder::avg(string table, vector<string> columns, map<string, string> where);
 //
 //    vector<map<string, string>> FdbrQueryBuilder::sum(string table, vector<string> columns, map<string, string> where);
+    
+     bool FdbrQueryBuilder::sortMethod(std::vector<std::map<std::string,std::string>> &data, std::map<std::string, std::string> order) {
+         map<string, string>::iterator itr = order.begin();
+         transform(itr->second.begin(), itr->second.end(), itr->second.begin(), ::toupper);
+         
+         std::sort(data.begin(), data.end(), [&](std::map<string,string> first, std::map<string,string> second) {
+             long int firstInt = std::atoi(first["a"].c_str());
+             long int secondInt = std::atoi(second["a"].c_str());
+             
+             if (errno == 0) {
+                 if (itr->second == "ASC") {
+                     return firstInt < secondInt;
+                 }
+                 else {
+                     return firstInt > secondInt;
+                 }
+             }
+             else {
+                 if (itr->second == "ASC") {
+                     return first["a"] < second["a"];
+                 }
+                 else {
+                     return first["a"] > second["a"];
+                 }
+             }
+         });
+         
+         return true;
+    }
 
     bool FdbrQueryBuilder::whereCompare(string str, string str1, string math) {
         if (">" == math && str <= str1) {
