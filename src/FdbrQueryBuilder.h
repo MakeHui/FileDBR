@@ -22,28 +22,34 @@ namespace FileDBR {
 
         bool insert(std::string table, std::map<std::string, std::string> datas);
 
-        int update(std::string table, std::map<std::string, std::string> datas, std::map<std::string, std::string> where);
+        unsigned int update(std::string table, std::map<std::string, std::string> datas, std::map<std::string, std::string> where = {});
 
-        int del(std::string table, std::map<std::string, std::string> where);
+        int del(std::string table, std::map<std::string, std::string> where = {});
 
         std::map<std::string, std::string> get(std::string table, std::vector<std::string> columns = {}, std::map<std::string, std::string> where = {}, std::map<std::string, std::string> order = {});
 
-        bool has(std::string table, std::map<std::string, std::string> where);
+        bool has(std::string table, std::map<std::string, std::string> where = {});
 
-        unsigned int count(std::string table, std::map<std::string, std::string> where);
+        unsigned int count(std::string table, std::map<std::string, std::string> where = {});
 
-        std::string max(std::string table, std::string column, std::map<std::string, std::string> where);
+        std::string max(std::string table, std::string column, std::map<std::string, std::string> where = {});
 
-        std::string min(std::string table, std::string column, std::map<std::string, std::string> where);
+        std::string min(std::string table, std::string column, std::map<std::string, std::string> where = {});
 
-        long double avg(std::string table, std::string column, std::map<std::string, std::string> where);
+        long double avg(std::string table, std::string column, std::map<std::string, std::string> where = {});
 
-        long double sum(std::string table, std::string column, std::map<std::string, std::string> where);
+        long double sum(std::string table, std::string column, std::map<std::string, std::string> where = {});
         
     protected:
         bool sortMethod(std::vector<std::map<std::string,std::string>> &data, std::map<std::string, std::string> order);
         
         bool whereCompare(std::string str, std::string str2, std::string math);
+        
+        bool checkColumns(std::vector<std::string> columns);
+        
+        std::vector<std::string> mapKeys(std::map<std::string, std::string> data);
+        
+        std::vector<std::string> mapValues(std::map<std::string, std::string> data);
 
         std::vector<std::string> split(const std::string str, std::string delimiter, int limit = 512);
         

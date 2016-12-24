@@ -146,10 +146,6 @@ namespace FileDBR {
     }
     
     bool FdbrDatabase::write(std::string fileName) {
-        if (this->fileData.size() == 0) {
-            return false;
-        }
-
         if (!this->openFile(fileName, std::ios_base::out|std::ios_base::trunc)) {
             return false;
         }
@@ -158,18 +154,13 @@ namespace FileDBR {
         for (int i = 0; i < this->fileStructure.size(); ++i) {
             row = row + this->fileStructure[i] + this->delimiter;
         }
-        row = row + "\n";
         this->fs.write(row.c_str(), row.size());
 
         for (int i = 0; i < this->fileData.size(); ++i) {
             std::map<std::string, std::string>::iterator itr;
-            row = "";
+            row = "\n";
             for (itr = this->fileData[i].begin(); itr != this->fileData[i].end(); ++itr) {
                 row = row + itr->second + this->delimiter;
-            }
-            
-            if (i != this->fileData.size() - 1) {
-                row = row + "\n";
             }
             this->fs.write(row.c_str(), row.size());
         }
