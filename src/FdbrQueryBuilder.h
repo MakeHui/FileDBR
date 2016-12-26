@@ -18,6 +18,10 @@ namespace FileDBR {
 
         ~FdbrQueryBuilder();
 
+        bool createTable(std::string table, std::vector<std::string> columns);
+        
+        bool deleteTable(std::string table);
+        
         std::vector<std::map<std::string, std::string>> select(std::string table, std::vector<std::string> columns = {}, std::map<std::string, std::string> where = {}, std::map<std::string, std::string> order = {});
 
         bool insert(std::string table, std::map<std::string, std::string> datas);

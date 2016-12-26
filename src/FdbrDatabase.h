@@ -30,6 +30,7 @@ namespace FileDBR {
         void setFileData(std::vector<std::map<std::string, std::string>> fileData);
 
         std::vector<std::string> getFileStructure();
+        void setFileStructure(std::vector<std::string> fileStructure);
 
         bool openFile(std::string fileName, std::ios_base::openmode openModel = std::ios_base::in|std::ios_base::out);
         void closeFile();

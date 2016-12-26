@@ -14,11 +14,22 @@ namespace FileDBR {
         this->database.setDatabasePath(databasePath);
         this->database.setDelimiter(delimiter);
         
-        this->maths = {">", ">=", "!", "<", "<=", "~", "!~", "="};
+        this->maths = {">", ">=", "!=", "<", "<=", "~", "!~", "="};
     }
 
     FdbrQueryBuilder::~FdbrQueryBuilder() {
 
+    }
+    
+    bool FdbrQueryBuilder::createTable(std::string table, std::vector<std::string> columns) {
+        this->database.createFile(table);
+        this->database.setFileStructure(columns);
+        
+        return this->database.write(table);
+    }
+    
+    bool FdbrQueryBuilder::deleteTable(std::string table) {
+        return this->database.delFile(table);
     }
 
     std::vector<std::map<std::string, std::string>> FdbrQueryBuilder::select(std::string table, std::vector<std::string> columns, std::map<std::string, std::string> where, std::map<std::string, std::string> order) {

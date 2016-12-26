@@ -50,6 +50,10 @@ namespace FileDBR {
     std::vector<std::string> FdbrDatabase::getFileStructure() {
         return this->fileStructure;
     }
+    
+    void FdbrDatabase::setFileStructure(std::vector<std::string> fileStructure) {
+        this->fileStructure = fileStructure;
+    }
 
     bool FdbrDatabase::openFile(std::string fileName, std::ios_base::openmode openModel) {
         if (this->databaseFile == fileName && this->currentOpenMode == openModel && this->fs) {
