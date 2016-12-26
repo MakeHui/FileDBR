@@ -25,20 +25,20 @@ int main(int argc, const char * argv[]) {
     FdbrQueryBuilder queryBuilder("/Users/MakeHui/Desktop/");
     string tableName = "text.txt";
     
+    cout << "--------createTable start----------" << endl;
+    bool createTable = queryBuilder.createTable(tableName, {"a", "b", "c"});
+    cout << createTable << endl;
+    
     cout << "--------insert start----------" << endl;
-    bool insert = queryBuilder.insert(tableName, {{"a", "223"}, {"b", "aaa"}, {"c", "aaa"}});
+    bool insert = queryBuilder.insert(tableName, {{"a", "223"}, {"b", "bbb"}, {"c", "ccc"}});
     cout << insert << endl;
     
     cout << "--------update start----------" << endl;
-    int updateCount = queryBuilder.update(tableName, {{"c", "ccc"}}, {{"b ~", "b"}});
+    int updateCount = queryBuilder.update(tableName, {{"b", "update"}}, {{"b", "bbb"}});
     cout << updateCount << endl;
     
-    cout << "--------delete start----------" << endl;
-    int delCount = queryBuilder.del(tableName, {{"a ~", "1"}});
-    cout << delCount << endl;
-    
     cout << "--------select start----------" << endl;
-    vector<map<string, string>> selectData = queryBuilder.select(tableName, {}, {}, {});
+    vector<map<string, string>> selectData = queryBuilder.select(tableName, {"a", "b"}, {{"b", "update"}}, {{"b", "desc"}});
     for (int i = 0; i < selectData.size(); ++i) {
         for (itr = selectData[i].begin(); itr != selectData[i].end(); ++itr) {
             cout << itr->second << " ";
@@ -47,7 +47,7 @@ int main(int argc, const char * argv[]) {
     }
     
     cout << "--------get start----------" << endl;
-    map<string, string> getData = queryBuilder.get(tableName);
+    map<string, string> getData = queryBuilder.get(tableName, {"a", "b"}, {{"b", "update"}}, {{"b", "desc"}});
     for (itr = getData.begin(); itr != getData.end(); ++itr) {
         cout << itr->second << " ";
     }
@@ -58,24 +58,32 @@ int main(int argc, const char * argv[]) {
     cout << has << endl;
     
     cout << "--------count start----------" << endl;
-    unsigned int countCount = queryBuilder.count(tableName, {{"a", "123"}});
-    cout << countCount << endl;
+    unsigned int count = queryBuilder.count(tableName, {{"a", "223"}});
+    cout << count << endl;
     
     cout << "--------max start----------" << endl;
-    string max = queryBuilder.max(tableName, "a", {{"a ~", "1"}});
+    string max = queryBuilder.max(tableName, "a", {{"a ~", "2"}});
     cout << max << endl;
     
     cout << "--------min start----------" << endl;
-    string min = queryBuilder.min(tableName, "a", {{"a ~", "1"}});
+    string min = queryBuilder.min(tableName, "a", {{"a !~", "4"}});
     cout << min << endl;
     
     cout << "--------avg start----------" << endl;
-    long double avg = queryBuilder.avg(tableName, "a", {{"a ~", "1"}});
+    long double avg = queryBuilder.avg(tableName, "a", {{"a", "223"}});
     cout << avg << endl;
     
     cout << "--------sum start----------" << endl;
-    long double sum = queryBuilder.sum(tableName, "a", {{"a ~", "1"}});
+    long double sum = queryBuilder.sum(tableName, "a", {{"a !=", "123"}});
     cout << sum << endl;
+    
+    cout << "--------delete start----------" << endl;
+    int delCount = queryBuilder.del(tableName, {{"b", "update"}});
+    cout << delCount << endl;
+    
+    cout << "--------deleteTable start----------" << endl;
+    int deleteTable = queryBuilder.deleteTable(tableName);
+    cout << deleteTable << endl;
     
     
     cout << "Hello, World!" << endl;
