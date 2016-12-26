@@ -185,7 +185,7 @@ namespace FileDBR {
         return lines;
     }
 
-    int FdbrQueryBuilder::del(std::string table, std::map<std::string, std::string> where) {
+    unsigned int FdbrQueryBuilder::del(std::string table, std::map<std::string, std::string> where) {
         std::vector<std::map<std::string, std::string>> fileData = this->database.read(table);
         std::vector<std::map<std::string, std::string>> result;
         std::vector<std::map<std::string, std::string>> _where;

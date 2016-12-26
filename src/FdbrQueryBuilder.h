@@ -28,7 +28,7 @@ namespace FileDBR {
 
         unsigned int update(std::string table, std::map<std::string, std::string> datas, std::map<std::string, std::string> where = {});
 
-        int del(std::string table, std::map<std::string, std::string> where = {});
+        unsigned int del(std::string table, std::map<std::string, std::string> where = {});
 
         std::map<std::string, std::string> get(std::string table, std::vector<std::string> columns = {}, std::map<std::string, std::string> where = {}, std::map<std::string, std::string> order = {});
 
