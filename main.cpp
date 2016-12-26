@@ -82,7 +82,7 @@ int main(int argc, const char * argv[]) {
     cout << delCount << endl;
     
     cout << "--------deleteTable start----------" << endl;
-    int deleteTable = queryBuilder.deleteTable(tableName);
+    bool deleteTable = queryBuilder.deleteTable(tableName);
     cout << deleteTable << endl;
     
     
