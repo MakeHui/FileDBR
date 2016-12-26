@@ -30,7 +30,6 @@ Create table
 > bool createTable(string table, vector\<string> columns)
 - table: The table name
 - columns: create column name
-- 
 - return: bool
 
 ```c++
@@ -43,7 +42,6 @@ Delete table
 
 > bool createTable(string table)
 - table: The table name
-- 
 - return: bool
 
 ```c++
@@ -133,7 +131,6 @@ Select data from table
 - columns: The target columns of data will be fetched
 - where: Query conditions
 - order: Sorting conditions
-- 
 - return: vector\<map\<string, string>>
 
 ```c++
@@ -147,7 +144,6 @@ Insert new records in table
 > bool insert(string table, map\<string, string> datas)
 - table: The table name
 - datas: The data will be inserted into table
-- 
 - return: bool
 
 ```c++
@@ -162,7 +158,6 @@ Modify data in table
 - table: The table name
 - datas: The data that will be modified
 - where: Query conditions
-- 
 - return: The number of rows affected
 
 ```c++
@@ -176,7 +171,6 @@ Delete data from table
 > unsigned int del(string table, map\<string, string> where = {})
 - table: The table name
 - where: Query conditions
-- 
 - return: The number of rows affected
 
 ```c++
@@ -192,7 +186,6 @@ Get only one record from table
 - columns: The target columns of data will be fetched
 - where: Query conditions
 - order: Sorting conditions
-- 
 - return map\<string, string>
 
 ```c++
@@ -206,7 +199,6 @@ Determine whether the target data existed
 > bool has(string table, map\<string, string> where = {})
 - table: The table name
 - where: Query conditions
-- 
 - return: bool
 
 ```c++
@@ -220,7 +212,6 @@ Counts the number of rows
 > unsigned int count(string table, map\<string, string> where = {});
 - table: The table name
 - where: Query conditions
-- 
 - return: unsigned int
 
 ```c++
@@ -235,7 +226,6 @@ Get the maximum value for the column and support string
 - table: The table name
 - column: The target column will be calculated
 - where: Query conditions
-- 
 - return: string
 
 ```c++
@@ -250,7 +240,6 @@ Get the minimum value for the column and support string
 - table: The table name
 - column: The target column will be calculated
 - where: Query conditions
-- 
 - return: string
 
 ```c++
@@ -265,7 +254,6 @@ Get the average value for the column
 - table: The table name
 - column: The target column will be calculated
 - where: Query conditions
-- 
 - return: long double
 
 ```c++
@@ -280,7 +268,6 @@ Get the total value for the column
 - table: The table name
 - column: The target column will be calculated
 - where: Query conditions
-- 
 - return: long double
 
 ```c++
